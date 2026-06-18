@@ -17,7 +17,6 @@ class AgentDB:
         try:
             cursor.execute(query, values)
             connection.commit()
-            id = cursor.lastrowid
             return cursor.lastrowid
             
         except Exception as e:
@@ -103,6 +102,7 @@ class AgentDB:
             connection.commit()
             if cursor.rowcount == 0:
                 return None
+            return "success"
         except Exception as e:
             print (e)
         finally:
@@ -117,17 +117,17 @@ class AgentDB:
             connection.commit()
             if cursor.rowcount == 0:
                 return None
+            return "success"
         except Exception as e:
             print (e)
         finally:
             cursor.close()
 
-    # def agent_performance(self,id):
-    #     connection = db.get_connection()
-    #     cursor = connection.cursor(dictionary=True)
-    #     query = "select completed_mission, failed_mission where id = %s"
-    #     try:
-    #         cursor.execute(query, (id,)) 
+    def count_active_agents(self):
+        connection = db.get_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("select count(*) from agent where is_active = True")
+
 
         
     

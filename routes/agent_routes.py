@@ -23,7 +23,7 @@ def create_agent(agent_data: AgentSchema):
 def get_all_agents():
     all_agents = db.get_all_agents()
     if not all_agents:
-        raise HTTPException(status_code=500, detail= "failed to get all books")
+        raise HTTPException(status_code=500, detail= "failed to get all agents")
     return all_agents
 
 @router.get("/{id}")
