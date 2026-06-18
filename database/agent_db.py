@@ -1,30 +1,24 @@
-from db_connection import DB_connector
-from pydantic import BaseModel
-from typing import Literal
+from database.db_connection import DB_connector
+
 
 db = DB_connector()
 
-class AgentSchma(BaseModel):
-    name : str
-    specialty : str
-    agent_rank : Literal['Junior', 'Senior', 'Commander']
-
-
 class AgentDB:
 
-    def create_agent(self,details: AgentSchma):
+    def create_agent(self, agent_details):
         connection = db.get_connection()
         cursor = connection.cursor(dictionary=True)
 
         query = """
-                insert into agents(name, specialty, agent_rank) values (%s, %s, %s);
+                insert into agents(name, specialty, agent_rank)
+                values (%s, %s, %s);
                 """
-        values = (details.name, details.specialty, details.agent_rank)
+        values = (agent_details.name, agent_details.specialty, agent_details.agent_rank)
         try:
             cursor.execute(query, values)
             connection.commit()
             id = cursor.lastrowid
-            return {"id": id, **details}
+            return cursor.lastrowid
             
         except Exception as e:
             connection.rollback()
@@ -63,13 +57,82 @@ class AgentDB:
         finally:
             cursor.close()
 
-    def update_agent(self, agent_id:int, details:AgentSchma):
+    def update_agent(self, details, agent_id:int,):
         connection = db.get_connection()
         cursor = connection.cursor(dictionary=True)
+        agent = details.model_dump()
 
         query = """
-                update agents set ()
+                update agents set name = %s,
+                specialty = %s,
+                agent_rank = %s
+                where id = %s
                 """
-    
-            
+        try:
+            cursor.execute(query, (agent["name"], agent["specialty"],agent["agent_rank"],agent_id))
+            connection.commit()
+            if cursor.rowcount == 0:
+                return None
+            return {"id": id, **agent}
+        except Exception as e:
+            print (e)
+        finally:
+            cursor.close()
+
+    def deactivate_agent(self,id):
+        connection = db.get_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = "update agents set is_active = False where id = %s"
+        try:
+            cursor.execute(query, (id,))
+            connection.commit()
+            if cursor.rowcount == 0:
+                return None
+            return id
+        except Exception as e:
+            print (e)
+        finally:
+            cursor.close()
+
+    def increment_completed(self,id):
+        connection = db.get_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = "update agents set completed_mission +=1 where id=%s"
+        try:
+            cursor.execute(query, (id,))
+            connection.commit()
+            if cursor.rowcount == 0:
+                return None
+        except Exception as e:
+            print (e)
+        finally:
+            cursor.close()
+
+    def increment_filed(self,id):
+        connection = db.get_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = "update agents set failed_mission +=1 where id=%s"
+        try:
+            cursor.execute(query, (id,))
+            connection.commit()
+            if cursor.rowcount == 0:
+                return None
+        except Exception as e:
+            print (e)
+        finally:
+            cursor.close()
+
+    # def agent_performance(self,id):
+    #     connection = db.get_connection()
+    #     cursor = connection.cursor(dictionary=True)
+    #     query = "select completed_mission, failed_mission where id = %s"
+    #     try:
+    #         cursor.execute(query, (id,)) 
+
         
+    
+
+
+
+
+            

@@ -5,13 +5,15 @@ class DB_connector:
         return mysql.connector.connect(host = "127.0.0.1",
                                        user = "root",
                                        password = "1234",
-                                       port = 3306)
+                                       port = 3306,
+                                       database = "Intelligence_db")
     
     def create_database(self):
         connection = self.get_connection()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute("create database if not exists Intelligence_db")
+        cursor.execute("create database if not exists Intelligence_db;")
+        cursor.execute("use Intelligence_db;")
         connection.commit()
         cursor.close()
 
@@ -19,7 +21,7 @@ class DB_connector:
         connection = self.get_connection()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute("""create table if not exists Intelligence_db.agent(
+        cursor.execute("""create table if not exists agents(
                                                    id int auto_increment primary key,
                                                    name varchar(50) not null,
                                                    specialty varchar(100) not null,
@@ -31,7 +33,7 @@ class DB_connector:
                                                    """)
         
 
-        cursor.execute("""create table if not exists Intelligence_db.missions(
+        cursor.execute("""create table if not exists missions(
                                                                id int auto_increment primary key,
                                                                title varchar(50) not null,
                                                                description text not null,
